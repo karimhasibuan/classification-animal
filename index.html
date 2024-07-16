@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Classification</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <h1>Image Classification</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="fileInput" class="file-upload-label">
+        <span id="fileLabel">Choose an Image</span>
+        <input type="file" id="fileInput" name="file" accept="image/*" />
+        <div id="fileName" class="file-name">No file chosen</div>
+      </label>
+      <button type="submit">Upload Image</button>
+    </form>
+    <div id="result">
+      <p class="placeholder">Upload an image to see the results here.</p>
+    </div>
+
+    <script>
+      // Update the file name display and label text when a file is selected
+      document.getElementById("fileInput").addEventListener("change", (event) => {
+        const fileName = event.target.files[0] ? event.target.files[0].name : "No file chosen";
+        document.getElementById("fileName").textContent = fileName;
+        document.getElementById("fileLabel").textContent = "Choose again";
+      });
+
+      document.getElementById("uploadForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData();
+        formData.append("file", document.getElementById("fileInput").files[0]);
+		// real api link = https://flaskapi-85be8b8fec71.herokuapp.com/predict
+        try {
+          const response = await fetch("http://localhost:5000/predict", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            const meanRgbOriginal = result.mean_rgb_original
+              .map((value) => Math.round(value))
+              .join("</p><p>");
+            const meanRgbSegmented = result.mean_rgb_segmented
+              .map((value) => Math.round(value))
+              .join("</p><p>");
+            document.getElementById("result").innerHTML = `
+            <h2>Prediction: ${result.prediction}</h2>
+            <p>Confidence: ${result.confidence}</p>
+            <div class="image-section">
+              <div class="image-container">
+                <h3>Original Image:</h3>
+                <img src="data:image/jpeg;base64,${result.original_image}" alt="Original Image" />
+                <p class="mean-rgb">Mean RGB of Original Image:</p>
+                <p>R: ${Math.round(result.mean_rgb_original[2])}</p>
+                <p>G: ${Math.round(result.mean_rgb_original[1])}</p>
+                <p>B: ${Math.round(result.mean_rgb_original[0])}</p>
+              </div>
+              <div class="image-container">
+                <h3>Segmented Image:</h3>
+                <img src="data:image/jpeg;base64,${result.segmented_image}" alt="Segmented Image" />
+                <p class="mean-rgb">Mean RGB of Segmented Image:</p>
+                <p>R: ${Math.round(result.mean_rgb_segmented[2])}</p>
+                <p>G: ${Math.round(result.mean_rgb_segmented[1])}</p>
+                <p>B: ${Math.round(result.mean_rgb_segmented[0])}</p>
+              </div>
+            </div>
+            <h3>HOG Image:</h3>
+            <img src="data:image/jpeg;base64,${result.hog_image}" alt="HOG Image" />
+            <p>HOG Image is in grayscale</p>
+          `;
+          } else {
+            document.getElementById("result").innerHTML = `
+            <h2>Error: ${response.statusText}</h2>
+          `;
+          }
+        } catch (error) {
+          document.getElementById("result").innerHTML = `
+          <h2>Error: ${error.message}</h2>
+        `;
+        }
+      });
+    </script>
+  </body>
+</html>
