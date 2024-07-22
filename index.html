@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Image Classification</title>
+    <title>Klasifikasi Gambar</title>
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <h1>Image Classification</h1>
-    <h2>by: FarkaTech</h2>
+    <h1>Klasifikasi Gambar</h1>
+    <h2>oleh: FarkaTech</h2>
     <form id="uploadForm" enctype="multipart/form-data">
       <label for="fileInput" class="file-upload-label">
-        <span id="fileLabel">Choose an Image</span>
+        <span id="fileLabel">Pilih Gambar</span>
         <input type="file" id="fileInput" name="file" accept="image/*" />
-        <div id="fileName" class="file-name">No file chosen</div>
+        <div id="fileName" class="file-name">Tidak ada file yang dipilih</div>
       </label>
-      <button type="submit">Classification</button>
+      <button type="submit">Klasifikasikan</button>
     </form>
     <div id="result">
-      <p class="placeholder">Upload an image to see the results here.</p>
+      <p class="placeholder">Unggah gambar untuk melihat hasil di sini.</p>
     </div>
 
     <script>
-      // Update the file name display and label text when a file is selected
+      // Memperbarui tampilan nama file dan teks label ketika file dipilih
       document.getElementById("fileInput").addEventListener("change", (event) => {
-        const fileName = event.target.files[0] ? event.target.files[0].name : "No file chosen";
+        const fileName = event.target.files[0] ? event.target.files[0].name : "Tidak ada file yang dipilih";
         document.getElementById("fileName").textContent = fileName;
-        document.getElementById("fileLabel").textContent = "Choose again";
+        document.getElementById("fileLabel").textContent = "Pilih lagi";
       });
 
       document.getElementById("uploadForm").addEventListener("submit", async (event) => {
         event.preventDefault();
         const formData = new FormData();
         formData.append("file", document.getElementById("fileInput").files[0]);
-		// real api link = https://flaskapi-85be8b8fec71.herokuapp.com/predict
+        // link API yang sebenarnya = https://flaskapi-85be8b8fec71.herokuapp.com/predict
         try {
           const response = await fetch("https://flaskapi-85be8b8fec71.herokuapp.com/predict", {
             method: "POST",
@@ -49,38 +49,38 @@
               .map((value) => Math.round(value))
               .join("</p><p>");
             document.getElementById("result").innerHTML = `
-            <h2>Prediction: ${result.prediction}</h2>
-            <p>Confidence: ${result.confidence}</p>
+            <h2>Prediksi: ${result.prediction}</h2>
+            <p>Kepercayaan: ${result.confidence}</p>
             <div class="image-section">
               <div class="image-container">
-                <h3>Original Image:</h3>
-                <img src="data:image/jpeg;base64,${result.original_image}" alt="Original Image" />
-                <p class="mean-rgb">Mean RGB of Original Image:</p>
+                <h3>Gambar Asli:</h3>
+                <img src="data:image/jpeg;base64,${result.original_image}" alt="Gambar Asli" />
+                <p class="mean-rgb">Rata-rata RGB dari Gambar Asli:</p>
                 <p>R: ${Math.round(result.mean_rgb_original[2])}</p>
                 <p>G: ${Math.round(result.mean_rgb_original[1])}</p>
                 <p>B: ${Math.round(result.mean_rgb_original[0])}</p>
               </div>
               <div class="image-container">
-                <h3>Segmented Image:</h3>
-                <img src="data:image/jpeg;base64,${result.segmented_image}" alt="Segmented Image" />
-                <p class="mean-rgb">Mean RGB of Segmented Image:</p>
+                <h3>Gambar Tersegmentasi:</h3>
+                <img src="data:image/jpeg;base64,${result.segmented_image}" alt="Gambar Tersegmentasi" />
+                <p class="mean-rgb">Rata-rata RGB dari Gambar Tersegmentasi:</p>
                 <p>R: ${Math.round(result.mean_rgb_segmented[2])}</p>
                 <p>G: ${Math.round(result.mean_rgb_segmented[1])}</p>
                 <p>B: ${Math.round(result.mean_rgb_segmented[0])}</p>
               </div>
             </div>
-            <h3>HOG Image:</h3>
-            <img src="data:image/jpeg;base64,${result.hog_image}" alt="HOG Image" />
-            <p>HOG Image is in grayscale</p>
+            <h3>Gambar HOG:</h3>
+            <img src="data:image/jpeg;base64,${result.hog_image}" alt="Gambar HOG" />
+            <p>Gambar HOG dalam skala abu-abu</p>
           `;
           } else {
             document.getElementById("result").innerHTML = `
-            <h2>Error: ${response.statusText}</h2>
+            <h2>Kesalahan: ${response.statusText}</h2>
           `;
           }
         } catch (error) {
           document.getElementById("result").innerHTML = `
-          <h2>Error: ${error.message}</h2>
+          <h2>Kesalahan: ${error.message}</h2>
         `;
         }
       });
